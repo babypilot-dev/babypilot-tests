@@ -1,0 +1,312 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BabyPilot v04.13 – Aufgabenwahl repariert</title><style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#173047;background:#f4f7fa}*{box-sizing:border-box}body{margin:0}header{background:#fff;border-bottom:1px solid #dfe8ee;padding:18px max(20px,calc((100vw - 980px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}.logo{font-weight:850;font-size:23px;color:#196b76}main{max-width:980px;margin:28px auto;padding:0 18px}h1{font-size:clamp(26px,4vw,38px);margin:0 0 8px}p{line-height:1.55;color:#526778}.panel{background:#fff;border:1px solid #dde7eb;border-radius:18px;padding:24px;margin:18px 0;box-shadow:0 8px 26px #19394b0b}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}label{display:block;font-weight:650;font-size:14px;margin-bottom:7px}input,select{font:inherit;width:100%;border:1px solid #bacbd4;border-radius:10px;padding:12px;background:white;color:#183245}button{font:inherit;border:0;border-radius:11px;padding:12px 18px;cursor:pointer;font-weight:750;background:#167681;color:white}button.secondary{background:#e9f2f3;color:#155b64}button.ghost{background:transparent;color:#176f79;border:1px solid #bcd5d9}.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}.hint{font-size:13px}.task{border:1px solid #e0e8eb;border-radius:14px;padding:16px;margin:12px 0;background:#fff}.taskhead{display:flex;align-items:flex-start;gap:12px}.task input{width:19px;height:19px;margin-top:4px;accent-color:#167681}.task h3{margin:0 0 4px;font-size:17px}.pill{display:inline-block;border-radius:20px;background:#e8f3f4;color:#17656f;padding:5px 9px;font-size:12px;font-weight:700;margin:4px 6px 4px 0}.warn{background:#fff6e5;color:#795114}.small{font-size:13px;color:#586c78}.progress{height:12px;background:#e2edef;border-radius:99px;overflow:hidden}.bar{height:100%;background:#168376;transition:width .2s}.topline{display:flex;align-items:center;justify-content:space-between;gap:14px}a{color:#126b79}.hidden{display:none}.batchmeter{display:flex;gap:5px;margin:12px 0}.batchmeter span{height:8px;border-radius:20px;flex:1;background:#dce9e9}.batchmeter span.ok{background:#168376}.batchdone{padding:15px;border-radius:13px;background:#eff9f5;color:#145d49}.catlabel{font-size:12px;color:#47717b;font-weight:700;margin-top:5px}.birthcontrol{padding:12px;border:1px solid #dce8ea;border-radius:12px;margin-top:12px}.birthcontrol label{display:flex;align-items:center;gap:9px;margin:0}.birthcontrol input{width:19px;height:19px;accent-color:#167681}.nextcard{border:1px solid #c8e1e2;border-radius:13px;padding:13px;margin:10px 0;background:#f6fbfb}.nextcard h3{margin:4px 0;font-size:16px}.nextcard.completed{background:#edf9f2;border-color:#80c9a2}.nextcard.completed h3{color:#31634d}.nextcard.completed .nextmeta{color:#23734c;font-weight:750}.nextcard.completed button{background:#d6eee0;color:#1e6646}.nextcard p{margin:5px 0}.nextmeta{font-size:12px;color:#536d78}.note{background:#edf6f8;padding:13px;border-radius:12px;font-size:13px}@media(max-width:620px){.grid{grid-template-columns:1fr}.panel{padding:18px}header{padding:16px 18px}}@media print{header button,.actions,#setup,.noprint{display:none!important}.panel{box-shadow:none}}
+
+/* Step 6: independent disclosure and completion controls; color is never the only status */
+.expandTask{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;text-align:left;width:100%;background:transparent;color:#173047;border:0;padding:8px 0 14px;border-radius:6px}.expandTask:focus-visible,.nextcard button:focus-visible{outline:3px solid #b65b00;outline-offset:3px}.taskHeading{display:flex;flex-direction:column;gap:7px;min-width:0}.taskHeading strong{font-size:18px;line-height:1.35}.taskHeading .small{font-weight:500}.chevron{font-size:27px;line-height:1}.nextdetails{padding:0 0 15px;border-top:1px solid #dbe7eb}.nextdetails p{margin:12px 0}.nextdetails a{display:inline-block;margin:5px 0 12px;color:#126577;text-decoration:underline;text-underline-offset:3px}.nextcard.completed{border:1px solid #dce6eb;background:#fff}.nextcard.completed .nextmeta{font-weight:800;color:#24475a}.nextcard.completed .nextmeta:before{content:'✓ ';font-weight:900}.nextcard.completed .expandTask{background:transparent;color:#173047}.nextcard.completed .taskHeading strong,.nextcard.completed .taskHeading .small{color:#173047}.nextcard.completed button.secondary{background:#d8eee1;color:#155a3e;border:1px solid #a6d5b8}.statusPrompt{border:1px solid #e5d3ae;background:#fffaf1;border-radius:14px;padding:16px;margin:16px 0}.statusPrompt h3{margin:0 0 8px}.statusPrompt .statusActions{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}.statusPrompt button{font-size:14px}.birthDateRow{margin-top:12px;max-width:320px}.statusPrompt p{margin:6px 0}.nextcard.completed{box-shadow:0 3px 12px #1d384308}.nextcard .catlabel{display:block}.nextcard button.secondary{max-width:100%}@media(max-width:600px){.expandTask{min-height:62px}}
+
+/* Step 6.3: phase sections and a single location per task */
+.phaseSection{border:1px solid #dfe8eb;border-radius:14px;overflow:hidden;margin:12px 0;background:#fff}
+.phaseSection>summary{list-style:none;cursor:pointer;padding:17px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;font-weight:750}
+.phaseSection>summary::-webkit-details-marker{display:none}
+.phaseSection>summary:after{content:'⌄';font-size:20px;color:#617784}
+.phaseSection[open]>summary:after{content:'⌃'}
+.phaseSection .phaseBody{padding:0 14px 14px}
+.phaseCount{font-size:12px;color:#627681;font-weight:500}
+.phaseSection .task{margin:10px 0}
+.phaseSection .task.isDone{border-color:#dce6e8}
+.phaseSection .task.isDone .taskStatus{font-weight:700;color:#315a52;font-size:12px}
+.phaseSection .task input{flex-shrink:0}
+
+/* 6.3.1: iPad Safari date-input intrinsic sizing fix; no task logic changes. */
+.grid > div { min-width: 0; }
+.grid input, .grid select { display: block; width: 100%; min-width: 0; max-width: 100%; }
+.grid input[type="date"] { -webkit-appearance: none; appearance: none; min-width: 0; }
+.birthDateRow { min-width: 0; max-width: 100%; }
+.birthDateRow input[type="date"] { display: block; width: 100%; min-width: 0; max-width: 100%; }
+
+/* BabyPilot v04 – Warm & Natural. Existing task logic remains unchanged. */
+:root{color-scheme:light;color:#2b4235;background:#f8f7f2}
+body{background:radial-gradient(circle at 90% 0%,#edf2e9,transparent 38%),#f8f7f2;color:#2b4235}
+header{background:#fffcf7;border-color:#e5e8df;box-shadow:0 2px 12px #354f3510}
+.logo{color:#436d59;letter-spacing:-.5px}.logo span{color:#829588!important}
+main{max-width:880px}
+h1{color:#263f32;letter-spacing:-.8px;font-size:clamp(26px,3.8vw,35px)}
+h2{color:#2f4b3b;font-size:20px}
+p{color:#68766b}
+.panel{background:#fffefa;border-color:#e8e9df;border-radius:22px;box-shadow:0 9px 32px #354f3510}
+label{color:#3b5244}
+input,select{border-color:#d6dfd5;border-radius:12px;color:#2b4135;min-height:45px}
+button{background:#557d65;border-radius:12px;min-height:44px}
+button.secondary{background:#e9f0e7;color:#385f49}
+button.ghost{color:#496c56;border-color:#d2dfd1;background:#fffefa}
+.progress{background:#e9eee5;height:9px}.bar,.batchmeter span.ok{background:#729b7b}
+.batchmeter span{background:#e8ede5}
+.pill{background:#eef3e9;color:#4e7359}.warn{background:#fff3dc;color:#7e622b}
+.note{background:#f0f4ed;color:#536c59}
+#nextPanel{background:linear-gradient(150deg,#f4f7ef,#fffefa 72%);border-color:#dbe6d7}
+.nextcard{background:#fffefa;border-color:#dce6d9;border-radius:17px;box-shadow:0 4px 14px #4259420a}
+.nextcard.completed{background:#eff6ed;border-color:#bdd6bd}
+.nextcard.completed .nextmeta{color:#426d4f}
+.nextcard.completed button.secondary{background:#dcebdc;color:#305b3a;border-color:#bfd8be}
+.nextcard h3,.task h3{color:#2e4938}
+.nextmeta,.catlabel{color:#67816b}
+.expandTask{color:#304a3a}
+.expandTask:focus-visible,.nextcard button:focus-visible{outline-color:#9ab79b}
+.taskHeading strong{font-size:17px}
+.chevron{color:#6c8a73}
+.nextdetails{border-color:#e4e9df}
+a,.nextdetails a{color:#436e55}
+.phaseSection{background:#fffefa;border-color:#e4e9df;border-radius:17px}
+.phaseSection>summary{color:#36513e}
+.phaseSection>summary:after{color:#64826d}
+.phaseCount{color:#849087}
+.phaseSection .task{border-color:#e5eae1}
+.phaseSection .task.isDone{background:#f2f7ef;border-color:#c9dec8;border-left:4px solid #76a27d}
+.phaseSection .task.isDone .taskStatus{color:#3c7249;font-weight:750}
+.task input,.birthcontrol input{accent-color:#608b68}
+.birthcontrol{border-color:#dce6d9;background:#f9fbf7}
+.batchdone{background:#e8f3e8;color:#376244}
+.statusPrompt{background:#fff9ed;border-color:#eddfc4}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #a2bca3;outline-offset:3px}
+@media(max-width:620px){main{margin:16px auto;padding:0 13px 36px}.panel{padding:19px;border-radius:18px}.topline{align-items:flex-start;flex-wrap:wrap}.logo{font-size:21px}.taskHeading strong{font-size:16px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important}}
+
+
+/* v04.1: compact overview and full phase list, including highlighted tasks */
+header{padding:12px max(16px,calc((100vw - 880px)/2))}.logo{font-size:21px}header button{padding:9px 12px;min-height:40px;font-size:14px}main{margin:14px auto}.panel{padding:19px;margin:12px 0;border-radius:17px}.overviewPanel{padding:18px 20px 14px}.overviewPanel h1{font-size:clamp(21px,3vw,27px);line-height:1.2;margin:0 0 5px}.overviewPanel #summary{font-size:13px;line-height:1.5;margin:0 0 12px;color:#64766a}.overviewPanel .progress{height:8px}.overviewPanel #progressText{font-size:12px;margin:8px 0 0}#nextPanel{margin-top:12px;padding:18px 20px}#nextPanel h2{font-size:19px;margin:0 0 5px}#nextPanel>p.small{font-size:12px;margin:0 0 10px}.nextcard{padding:11px 13px;margin:9px 0}.nextcard .expandTask{min-height:0;padding:4px 0 8px}.nextcard .taskHeading strong{font-size:15px}.nextcard .nextmeta{font-size:11px}.nextcard .chevron{font-size:21px}.nextcard button.secondary{padding:9px 12px;min-height:40px;font-size:13px}.settingsPanel{margin:12px 0;border:1px solid #e4e9df;border-radius:15px;background:#fffefa}.settingsPanel>summary{padding:13px 17px;cursor:pointer;font-size:13px;font-weight:700;color:#526e5a}.settingsPanel>summary::marker{color:#729b7b}.settingsBody{padding:0 15px 15px;display:flex;flex-wrap:wrap;gap:9px}.settingsBody button{font-size:13px;padding:9px 12px;min-height:40px}.settingsDivider{flex-basis:100%;border-top:1px solid #e4e9df;margin-top:4px}.settingsBody .note{flex-basis:100%;font-size:11px;line-height:1.45;margin:5px 0 0;padding:10px}.highlightBadge{display:inline-block;font-size:11px;font-weight:700;color:#496c56;background:#e8f0e5;padding:4px 8px;border-radius:20px;margin:4px 0}.phaseCount{line-height:1.5;display:inline-block}.phaseSection>summary{align-items:center}@media(max-width:620px){main{margin:10px auto;padding:0 12px 30px}header{padding:10px 13px}.logo{font-size:19px}.logo span{font-size:10px!important}.panel{padding:15px;margin:10px 0;border-radius:16px}.overviewPanel{padding:15px 16px 12px}.overviewPanel h1{font-size:22px}.overviewPanel #summary{font-size:12px;margin-bottom:10px}#nextPanel{padding:15px 16px}#nextPanel h2{font-size:18px}.nextcard .taskHeading strong{font-size:15px}.birthcontrol{padding:10px}.settingsBody{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.settingsBody button{font-size:12px;line-height:1.25;padding:9px 7px}.settingsDivider,.settingsBody .note{grid-column:1/-1}}@media print{.settingsPanel{display:none!important}}
+
+/* v04.2 – tasks first; expandable priority group; settings last */
+.overviewPanel{position:relative;padding-right:56px}
+.quickEdit{position:absolute;right:16px;top:15px;min-width:34px;min-height:34px;padding:4px;border:1px solid #d8e3d7;background:#f3f7ef;color:#496d53;border-radius:10px;font-size:20px;font-weight:600;line-height:1}
+#nextPanel{overflow:visible}
+#nextPanel>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 0 8px;color:#2f4b3b}
+#nextPanel>summary::-webkit-details-marker{display:none}
+#nextPanel>summary:after{content:'⌃';font-size:22px;color:#64826d}
+#nextPanel:not([open])>summary:after{content:'⌄'}
+#nextPanel>summary strong{font-size:19px;display:block;line-height:1.3}
+#nextPanel>summary .small{display:block;margin-top:3px;font-size:12px;color:#617968}
+#nextPanel:not([open])>summary{padding-bottom:2px}
+#nextPanel>p.small{margin-top:4px}
+.settingsPanel{margin-top:18px;margin-bottom:26px}
+@media(max-width:620px){#nextPanel>summary strong{font-size:18px}.quickEdit{right:12px;top:12px}}
+@media print{#nextPanel:not([open])>summary:after{display:none}}
+.overviewPanel{background:linear-gradient(135deg,#eaf2e7,#f5f8f0 65%,#fffefa);border-color:#cadfc9}.task.isDone{padding:10px 13px}.doneDisclosure>summary{cursor:pointer;list-style:none;display:flex;align-items:center;min-height:38px}.doneDisclosure>summary::-webkit-details-marker{display:none}.doneDisclosure>summary:after{content:'⌄';margin-left:auto}.doneDisclosure[open]>summary:after{content:'⌃'}.doneDisclosure h3{font-size:15px;margin:0 0 3px}.doneBody{padding-top:8px}/* v04.5 accessible due-date emphasis */
+#due{border:2px solid #496f57;background:#edf5eb;box-shadow:0 0 0 3px #d7e7d2;font-weight:650}#due:focus{outline:3px solid #214d39;outline-offset:3px}
+.task:not(.isDone) .doneDisclosure>summary{padding:1px 0}.task .doneDisclosure>summary h3{font-size:15px;line-height:1.35}.task .doneDisclosure>summary:focus-visible{outline:2px solid #496f57;outline-offset:3px}.task .doneDisclosure{width:100%}.task .taskhead>div{flex:1;min-width:0}.task .doneBody{padding-bottom:8px}/* v04.7: center checkbox, multiline title and disclosure arrow in compact phase cards */
+#tasks .task .taskhead{display:flex;align-items:center;gap:14px}
+#tasks .task .taskhead>input[type="checkbox"]{flex:0 0 auto;align-self:center;margin-top:0;margin-bottom:0}
+#tasks .task .taskhead>div{flex:1;min-width:0}
+#tasks .task .doneDisclosure>summary{display:flex;align-items:center;gap:10px;min-height:44px}
+#tasks .task .doneDisclosure>summary>span{display:block;flex:1;min-width:0}
+#tasks .task .doneDisclosure>summary h3{margin:0;line-height:1.35}
+#tasks .task .doneDisclosure>summary:after{align-self:center;flex:0 0 auto;margin-left:auto}
+/* v04.8 – restrained phase distinction, accessible without color */
+.phaseProgress{padding:9px 12px;margin-top:9px;border-left:4px solid;border-radius:8px;background:#f5f8f8}
+.phaseProgress strong{display:block;font-size:13px;margin-bottom:8px}
+.beforeProgress{border-color:#428468;background:#f1f7f1}.afterProgress{border-color:#5680ad;background:#f0f5fa}
+.beforeProgress .bar{background:#428468}.afterProgress .bar{background:#5680ad}
+.phaseSection.phaseBefore{border-left:4px solid #428468}.phaseSection.phaseAfter{border-left:4px solid #5680ad}
+.phaseBefore>summary{background:#f1f7f1}.phaseAfter>summary{background:#f0f5fa}
+.birthcontrolSubtle{border:0;background:transparent;padding:7px 0;margin:7px 0;font-size:13px;color:#526778}
+/* v04.9: retain soft phase backgrounds but remove progress side bars */
+.phaseProgress{border-left:0;border-radius:10px;padding:10px 13px}
+.beforeProgress{background:#f1f7f1}.afterProgress{background:#f0f5fa}
+/* consistent neutral outlines; only phase panels retain colored edge */
+#results>.panel,.settingsPanel,.phaseSection{border:1px solid #dce5dc}
+.phaseSection.phaseBefore{border-left:4px solid #428468}.phaseSection.phaseAfter{border-left:4px solid #5680ad}
+/* birth-status option occupies a full row beneath regular controls */
+#settingsBody #birthControl{flex:0 0 100%;width:100%;margin:3px 0 0;padding:12px 14px;background:#f6f8f4;border:1px solid #dce5dc;border-radius:12px}
+#settingsBody #birthControl label{display:flex;align-items:center;gap:12px;min-height:40px}
+#settingsBody #birthControl #bornLabel{font-size:14px;font-weight:600}
+/* checkbox centered while collapsed; aligned with title once details expand */
+#tasks .task:has(.doneDisclosure[open]) .taskhead{align-items:flex-start}
+#tasks .task:has(.doneDisclosure[open]) .taskhead>input[type="checkbox"]{align-self:flex-start;margin-top:9px}
+#tasks .task:has(.doneDisclosure[open]) .doneDisclosure>summary{min-height:44px}
+/* v04.10: fixed header geometry; details flow full width below title */
+#tasks .task{padding:13px 15px;margin:10px 0}
+#tasks .task .taskhead{display:grid;grid-template-columns:23px minmax(0,1fr);column-gap:13px;align-items:start}
+#tasks .task .taskhead>input[type="checkbox"]{grid-column:1;grid-row:1;align-self:center;margin:0;width:21px;height:21px}
+#tasks .task .doneDisclosure{grid-column:2;grid-row:1;width:100%;min-width:0}
+#tasks .task .doneDisclosure>summary{min-height:48px;display:flex;align-items:center;gap:9px;padding:0}
+#tasks .task .doneDisclosure>summary h3{font-size:15px;line-height:1.32;margin:0}
+#tasks .task .doneDisclosure[open] .doneBody{width:calc(100% + 36px);margin-left:-36px;padding:12px 0 2px 0;border-top:1px solid #edf0ea;margin-top:12px}
+#tasks .task .doneDisclosure[open] .doneBody p{margin:9px 0;line-height:1.48}
+#tasks .task .doneDisclosure[open] .doneBody .catlabel{margin-top:2px}
+#tasks .task:has(.doneDisclosure[open]) .taskhead{align-items:start}
+#tasks .task:has(.doneDisclosure[open]) .taskhead>input[type="checkbox"]{align-self:start;margin-top:13px}
+/* avoid state-dependent checkbox alignment: same position for both states */
+#tasks .task .taskhead>input[type="checkbox"],#tasks .task:has(.doneDisclosure[open]) .taskhead>input[type="checkbox"]{align-self:start;margin-top:13px}
+/* reduce phase stripe weight while preserving color and text distinction */
+.phaseSection.phaseBefore{border-left:3px solid #6a9980}
+.phaseSection.phaseAfter{border-left:3px solid #7897b9}
+/* v04.11: keep checkbox centered against the immutable summary row */
+#tasks .task .taskhead{grid-template-columns:23px minmax(0,1fr);align-items:start}
+#tasks .task .taskhead>input[type="checkbox"],#tasks .task:has(.doneDisclosure[open]) .taskhead>input[type="checkbox"]{align-self:start;margin-top:0;position:relative;top:13.5px}
+#tasks .task .doneDisclosure>summary{min-height:48px}
+/* consistent left-edge treatment across main panels */
+#results>.panel,#results>.settingsPanel{border-left:3px solid #d6dfd7}
+.phaseSection.phaseBefore{border-left:3px solid #6a9980}
+.phaseSection.phaseAfter{border-left:3px solid #7897b9}
+.swapTaskBtn{display:block;margin-top:8px;padding:8px 10px;font-size:12px;background:#f5f8f5;color:#496c56;border:1px solid #d4dfd5}
+/* v04.13: checkbox center measured against fixed summary height, unchanged when opened */
+#tasks .task .taskhead{position:relative;grid-template-columns:23px minmax(0,1fr)}
+#tasks .task .taskhead>input[type="checkbox"],#tasks .task:has(.doneDisclosure[open]) .taskhead>input[type="checkbox"]{position:absolute;top:24px;left:0;transform:translateY(-50%);margin:0;align-self:auto}
+#tasks .task .doneDisclosure{grid-column:2;grid-row:1}
+</style></head><body><header><div class="logo">✳ BabyPilot <span style="font-size:12px;color:#8095a1;font-weight:500">PROTOTYP</span></div><button class="ghost" id="langBtn" onclick="toggleLang()">English</button></header><main><section id="setup" class="panel"><h1 data-de="Weniger Bürokratie. Mehr Babyzeit." data-en="Less paperwork. More baby time.">Weniger Bürokratie. Mehr Babyzeit.</h1><p data-de="Beantworte ein paar Fragen. Wir erstellen einen persönlichen Aufgabenplan für die Zeit vor und nach der Geburt." data-en="Answer a few questions to get a personal checklist for before and after birth.">Beantworte ein paar Fragen. Wir erstellen einen persönlichen Aufgabenplan für die Zeit vor und nach der Geburt.</p><div class="grid"><div><label data-de="Voraussichtlicher Geburtstermin" data-en="Expected due date">Voraussichtlicher Geburtstermin</label><input id="due" type="date"></div><div><label data-de="Bundesland" data-en="Federal state">Bundesland</label><select id="state"><option value="BY" data-de="Bayern" data-en="Bavaria">Bayern</option><option value="other" data-de="Anderes Bundesland (Vorschau)" data-en="Other federal state (preview)">Anderes Bundesland (Vorschau)</option></select></div><div><label data-de="Familienstand" data-en="Marital status">Familienstand</label><select id="married"><option value="yes" data-de="Verheiratet" data-en="Married">Verheiratet</option><option value="no" data-de="Nicht verheiratet" data-en="Not married">Nicht verheiratet</option></select></div><div><label data-de="Berufliche Situation von Elternteil 1" data-en="Parent 1’s employment status">Berufliche Situation von Elternteil 1</label><select id="p1"><option value="yes" data-de="Angestellt" data-en="Employed">Angestellt</option><option value="self" data-de="Selbstständig" data-en="Self-employed">Selbstständig</option><option value="no" data-de="Derzeit nicht erwerbstätig" data-en="Currently not working">Derzeit nicht erwerbstätig</option></select></div><div><label data-de="Berufliche Situation von Elternteil 2" data-en="Parent 2’s employment status">Berufliche Situation von Elternteil 2</label><select id="p2"><option value="yes" data-de="Angestellt" data-en="Employed">Angestellt</option><option value="self" data-de="Selbstständig" data-en="Self-employed">Selbstständig</option><option value="no" data-de="Derzeit nicht erwerbstätig" data-en="Currently not working">Derzeit nicht erwerbstätig</option></select></div><div><label data-de="Welche Staatsangehörigkeit haben die Elternteile?" data-en="What are the parents’ nationalities?">Welche Staatsangehörigkeit haben die Elternteile?</label><select id="international" required><option value="" data-de="Bitte auswählen" data-en="Please select">Bitte auswählen</option><option value="no" data-de="Beide deutsch" data-en="Both German">Beide deutsch</option><option value="mixed" data-de="Eine Person deutsch, eine nicht deutsch" data-en="One German, one non-German">Eine Person deutsch, eine nicht deutsch</option><option value="yes" data-de="Beide nicht deutsch" data-en="Neither German">Beide nicht deutsch</option></select><p class="hint" data-de="Gemeint ist die Staatsangehörigkeit, nicht das Geburtsland. Bei doppelter Staatsangehörigkeit mit deutschem Pass bitte als deutsch einordnen." data-en="This refers to nationality, not place of birth. If someone holds German nationality as well as another, count them as German.">Gemeint ist die Staatsangehörigkeit, nicht das Geburtsland. Bei doppelter Staatsangehörigkeit mit deutschem Pass bitte als deutsch einordnen.</p></div></div><div class="actions"><button type="button" onclick="generate()" data-de="Meinen Fahrplan erstellen →" data-en="Create my plan →">Meinen Fahrplan erstellen →</button></div><p class="hint" data-de="Deine Angaben werden nur lokal in diesem Browser gespeichert. Kein Konto, kein Upload. Demonstration – keine Rechtsberatung." data-en="Your answers are stored locally in this browser only. No account or upload. Demo, not legal advice.">Deine Angaben werden nur lokal in diesem Browser gespeichert. Kein Konto, kein Upload. Demonstration – keine Rechtsberatung.</p></section><section id="results" class="hidden"><div class="panel overviewPanel"><h1 id="planTitle">Dein Fahrplan</h1><p id="summary"></p><button class="quickEdit noprint" type="button" onclick="edit()" aria-label="Angaben ändern" title="Angaben ändern" id="quickEditBtn">✎</button><div class="phaseProgress beforeProgress"><strong id="beforeProgressText"></strong><div class="progress" role="progressbar" id="beforeProgressBar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" id="beforeBar"></div></div></div><div class="phaseProgress afterProgress"><strong id="afterProgressText"></strong><div class="progress" role="progressbar" id="afterProgressBar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" id="afterBar"></div></div></div></div><details class="panel" id="nextPanel" open><summary class="nextPanelSummary"><span><strong id="nextTitle"></strong><span class="small" id="nextPanelCount"></span></span></summary><p class="small" id="nextIntro"></p><div id="pastDuePrompt" class="hidden"></div><div id="nextTasks"></div><div class="birthcontrol noprint" id="birthControl"><label><input type="checkbox" id="bornCheck" onchange="setBorn(this.checked)"><span id="bornLabel"></span></label></div></details><div id="tasks"></div><details class="settingsPanel noprint"><summary data-de="Weitere Optionen ⚙" data-en="More options ⚙">Weitere Optionen ⚙</summary><div class="settingsBody" id="settingsBody"><button class="secondary" onclick="edit()" id="editBtn">Angaben ändern</button><button class="secondary" onclick="window.print()" id="printBtn">Drucken / Als PDF sichern</button><div class="settingsDivider"></div><button class="ghost" onclick="resetAll()" id="resetBtn">Fortschritt löschen</button><button class="ghost" onclick="newPlan()" id="newPlanBtn">Neuen Fahrplan starten</button><p class="note" id="disclaimer"></p></div></details></section></main><script>
+let lang=(safeGet('bp-lang')==='en'?'en':'de'), current=[];const $=id=>document.getElementById(id);const t=(de,en)=>lang==='de'?de:en;const official={familien:'https://familienportal.de/',elterngeld:'https://www.zbfs.bayern.de/familie/elterngeld/',kindergeld:'https://www.arbeitsagentur.de/familie-und-kinder/kindergeld',standesamt:'https://www.regensburg.de/leben/verwaltung-und-service/buergerservice/standesamt',tk:'https://familienportal.de/'};
+const tasks=[
+{id:'midwife',phase:'before',category:'care',title:['Hebamme für die Wochenbettbetreuung suchen','Find a midwife for postnatal care'],desc:['Möglichst früh Hebammen kontaktieren und nach freien Kapazitäten für die Betreuung nach der Geburt fragen.','Contact midwives early to ask about availability for postnatal care.'],docs:['Voraussichtlicher Geburtstermin, Wohnort und Kontaktdaten','Expected due date, location and contact details'],when:['Möglichst früh in der Schwangerschaft','As early as possible in pregnancy'],link:'https://www.hebammenverband.de/'},
+{id:'birthplace',phase:'before',category:'care',title:['Geburtsort auswählen und Anmeldung klären','Choose where to give birth and check registration'],desc:['Geburtskliniken oder andere Geburtsorte vergleichen und nachfragen, ob und wann eine Anmeldung erforderlich ist.','Compare maternity hospitals or other birth settings and check whether and when registration is needed.'],docs:['Voraussichtlicher Geburtstermin, gegebenenfalls Mutterpass für die Anmeldung','Expected due date and, if required for registration, maternity record'],when:['Während der Schwangerschaft; Anmeldefristen vor Ort prüfen','During pregnancy; check local registration timing'],link:'https://familienportal.de/'},
+{id:'registry',phase:'birth',title:['Geburt beim Standesamt beurkunden lassen','Register the birth at the registry office'],desc:['Kläre mit dem Geburtskrankenhaus und dem zuständigen Standesamt, welche Originalurkunden und Übersetzungen benötigt werden.','Ask the hospital and registry office which original certificates and translations are required.'],docs:['Ausweise, Heiratsurkunde bzw. Geburtsurkunden der Eltern; ggf. Übersetzungen/Apostillen – individuell bestätigen lassen','IDs, marriage certificate and/or parents’ birth certificates; translations/apostilles if requested'],when:['Nach der Geburt; die Geburt muss in Deutschland grundsätzlich binnen einer Woche angezeigt werden.','After birth; births in Germany generally must be reported within one week.'],link:official.standesamt},
+{id:'kindergeld',phase:'birth',title:['Kindergeld beantragen','Apply for child benefit'],desc:['Antrag bei der Familienkasse stellen, sobald die erforderlichen Geburtsdaten vorliegen.','Apply to the Family Benefits Office once the necessary birth details are available.'],docs:['Steuer-ID des Kindes und des antragstellenden Elternteils, Bankverbindung','Child’s and applicant’s tax IDs, bank details'],when:['Nach der Geburt','After birth'],link:official.kindergeld},
+{id:'elterngeld',phase:'birth',title:['Elterngeld beantragen','Apply for parental allowance'],desc:['Anspruch, Bezugsmonate und Nachweise prüfen. In Bayern über das ZBFS. Bei internationalen Familien Aufenthaltstitel und Voraussetzungen individuell klären.','Check eligibility, benefit months and evidence. In Bavaria use ZBFS. For international families, verify residence status and eligibility.'],docs:['Geburtsurkunde für Elterngeld, Einkommensnachweise, ggf. Arbeitgeberbescheinigungen und Aufenthaltstitel','Birth certificate for parental allowance, income evidence, possibly employer certificates and residence permit'],when:['Nach der Geburt; rückwirkende Auszahlung ist zeitlich begrenzt – zeitnah beantragen.','After birth; retroactive payments are limited, so apply promptly.'],link:official.elterngeld},
+{id:'health',phase:'before',title:['Krankenversicherung fürs Baby klären','Check health insurance for your baby'],desc:['Vorab bei der Krankenkasse klären, wie das Baby nach der Geburt versichert werden kann.','Ask the health insurer how your baby can be covered after birth.'],docs:['Versicherungsdaten der Eltern; bei Bedarf weitere Angaben zur Familiensituation','Parents’ insurance details; further family information if requested'],when:['Vor der Geburt','Before birth'],link:official.tk},
+{id:'health_register',phase:'birth',title:['Baby bei der Krankenkasse anmelden','Register your baby with health insurance'],desc:['Nach der Geburt die Aufnahme des Babys bei der zuständigen Krankenversicherung beantragen.','After birth, apply to register your baby with the appropriate health insurer.'],docs:['Geburtsnachweis und Angaben zur Versicherung der Eltern; genaue Anforderungen bei der Kasse erfragen','Birth record and parents’ insurance details; confirm requirements with the insurer'],when:['Nach der Geburt','After birth'],link:official.tk},
+{id:'pediatrician',phase:'before',title:['Kinderarzt und U-Untersuchungen planen','Plan pediatric care and checkups'],desc:['Kinderarztpraxis kontaktieren und die ersten Vorsorgeuntersuchungen organisieren.','Contact a pediatrician and arrange the first newborn checkups.'],docs:['Krankenversicherungsdaten, nach Geburt U-Heft','Health insurance details; child health record after birth'],when:['Vor der Geburt vorbereiten','Prepare before birth'],link:official.familien},
+{id:'leave1',phase:'before',condition:v=>v.p1==='yes',title:['Elternzeit für Elternteil 1 anmelden','Notify employer of parental leave for parent 1'],desc:['Elternzeit mit den geplanten Zeiträumen beim Arbeitgeber in Textform (z. B. per E-Mail) anmelden. Fristen und Bindungszeitraum beachten.','Notify your employer of the planned leave periods in text form (e.g. by email). Check deadlines and the binding period.'],docs:['Elternzeitanmeldung in Textform; Bestätigung aufbewahren','Parental leave notice in text form; keep confirmation'],when:['Spätestens 7 Wochen vor dem geplanten Beginn anmelden. Gilt grundsätzlich für Elternzeit vor dem 3. Geburtstag; Ausnahmen sind möglich.','Notify at least 7 weeks before the planned start. This generally applies to leave before the child turns three; exceptions may apply.'],link:official.familien},
+{id:'leave2',phase:'before',condition:v=>v.p2==='yes',title:['Elternzeit für Elternteil 2 anmelden','Notify employer of parental leave for parent 2'],desc:['Geplante Elternzeit beim Arbeitgeber in Textform (z. B. per E-Mail) anmelden.','Notify your employer of planned parental leave in text form (e.g. by email).'],docs:['Elternzeitanmeldung in Textform','Notice in text form to employer'],when:['Spätestens 7 Wochen vor dem geplanten Beginn anmelden. Gilt grundsätzlich für Elternzeit vor dem 3. Geburtstag; Ausnahmen sind möglich.','Notify at least 7 weeks before the planned start. This generally applies to leave before the child turns three; exceptions may apply.'],link:official.familien},
+{id:'recognition',phase:'before',condition:v=>v.married==='no',title:['Vaterschaftsanerkennung und Sorgeerklärung prüfen','Review paternity recognition and custody declaration'],desc:['Bei unverheirateten Eltern prüfen, welche Erklärungen sinnvoll oder erforderlich sind.','For unmarried parents, check which declarations are appropriate or necessary.'],docs:['Ausweise und gegebenenfalls Geburtsurkunden','IDs and potentially birth certificates'],when:['Möglichst vor der Geburt prüfen','Ideally check before birth'],link:official.familien},
+{id:'intl',phase:'before',condition:v=>v.international!=='no',title:['Internationale Urkunden und Aufenthaltstitel prüfen','Check international documents and residence status'],desc:['Bei ausländischen Urkunden frühzeitig Anforderungen zu Übersetzungen, Apostillen und ggf. Leistungsberechtigung abklären.','Check translation, apostille and possible benefit eligibility requirements for foreign documents early.'],docs:['Originalurkunden, beglaubigte Übersetzungen, ggf. Apostille, Aufenthaltstitel','Original certificates, certified translations, possible apostille, residence permit'],when:['Vor der Geburt klären','Check before birth'],link:official.familien},
+{id:'maternity',phase:'before',condition:v=>true,title:['Mutterschutz und mögliche Leistungen klären','Check maternity protection and possible benefits'],desc:['Prüft, ob für die gebärende Person Mutterschutz und Mutterschaftsleistungen infrage kommen. Entscheidend sind ihre eigene berufliche und versicherungsrechtliche Situation – nicht allein die Beschäftigung des anderen Elternteils.','Check whether maternity protection and benefits apply to the birthing parent. Their own employment and insurance situation matters, not merely the other parent’s employment.'],docs:['Bescheinigung über den voraussichtlichen Geburtstermin, Versicherungs-/Beschäftigungsnachweise','Due-date certificate, insurance and employment details'],when:['Vor der Geburt; abhängig von der Situation','Before birth; depends on circumstances'],link:official.familien}
+];
+function vals(){return {due:$('due').value,state:$('state').value,married:$('married').value,p1:$('p1').value,p2:$('p2').value,international:$('international').value}}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function safeGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function safeSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}function safeRemove(k){try{localStorage.removeItem(k)}catch(e){}}function generate(){window.bpPhaseOrder=null;const v=vals();if(!v.international){alert(t('Bitte Staatsangehörigkeit auswählen.','Please select nationalities.'));return}if(!v.due){alert(t('Bitte Geburtstermin angeben.','Please enter a due date.'));return}const previous=JSON.parse(safeGet('bp-profile')||'null');if(previous && ['due','state','married','p1','p2','international'].some(k=>previous[k]!==v[k])){safeRemove('bp-batch');safeRemove('bp-visited');}if(previous && previous.due!==v.due){safeRemove('bp-birth-status-confirmed');if(new Date(v.due+'T12:00:00')>=new Date(new Date().toDateString())){safeSet('bp-born','false');safeRemove('bp-actual-birthdate');safeRemove('bp-batch')}}safeSet('bp-profile',JSON.stringify({...v,profileVersion:3}));current=tasks.filter(a=>!a.condition||a.condition(v));$('setup').classList.add('hidden');$('results').classList.remove('hidden');render();window.scrollTo(0,0)}function formatDue(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))return value||'';const [y,m,d]=value.split('-').map(Number);if(lang==='de')return String(d).padStart(2,'0')+'.'+String(m).padStart(2,'0')+'.'+y;return new Intl.DateTimeFormat('en-GB',{day:'numeric',month:'short',year:'numeric'}).format(new Date(y,m-1,d));}
+function render(){const v=vals(),done=JSON.parse(safeGet('bp-done')||'{}');$('planTitle').textContent=t('Dein persönlicher Baby-Fahrplan','Your personal baby preparation plan');$('summary').textContent=t('Voraussichtlicher Geburtstermin: ','Expected due date: ')+formatDue(v.due)+' · '+(v.state==='BY'?t('Bayern','Bavaria'):t('Anderes Bundesland (nur allgemeine Hinweise)','Other state (general guidance only)'));$('quickEditBtn').setAttribute('aria-label',t('Angaben ändern','Edit answers'));$('quickEditBtn').title=t('Angaben ändern','Edit answers');$('editBtn').textContent=t('Angaben ändern','Edit answers');$('printBtn').textContent=t('Drucken / Als PDF sichern','Print / Save PDF');$('resetBtn').textContent=t('Fortschritt löschen','Reset progress');$('newPlanBtn').textContent=t('Neuen Fahrplan starten','Start a new plan');$('disclaimer').textContent=t('Wichtig: Dies ist ein nicht verifizierter Demonstrations-Prototyp, kein offizieller Behördenservice und keine Rechtsberatung. Termine sind Orientierungshilfen. Zuständigkeiten, Leistungsansprüche und Fristen bitte über die verlinkten offiziellen Stellen prüfen.','Important: This is an unverified demo, not an official service or legal advice. Dates are guidance only. Verify deadlines, eligibility and authorities using official links.');for(const [phase,barId,textId,containerId] of [['before','beforeBar','beforeProgressText','beforeProgressBar'],['birth','afterBar','afterProgressText','afterProgressBar']]){const tasks=current.filter(a=>a.phase===phase),finished=tasks.filter(a=>done[a.id]).length,pct=tasks.length?Math.round(100*finished/tasks.length):0;$(barId).style.width=pct+'%';$(textId).textContent=t(phase==='before'?'Vor der Geburt: ':'Nach der Geburt: ',phase==='before'?'Before birth: ':'After birth: ')+finished+' / '+tasks.length+t(' erledigt',' completed');$(containerId).setAttribute('aria-valuenow',String(pct));$(containerId).setAttribute('aria-label',$(textId).textContent);}// Keep a stable three-task batch until the parent explicitly requests another one.
+const born=safeGet('bp-born')==='true';
+$('bornCheck').checked=born;
+$('bornLabel').textContent=t('Unser Baby ist geboren – Aufgaben nach der Geburt aktivieren','Our baby has been born – activate after-birth tasks');
+const dueDate=new Date(v.due+'T12:00:00'), today=new Date();today.setHours(12,0,0,0);
+const days=Math.round((dueDate-today)/86400000);
+const statusConfirmed=safeGet('bp-birth-status-confirmed')==='true';
+const pastDue=days<0;
+const beforeTasks=current.filter(a=>a.phase==='before');
+const beforeComplete=beforeTasks.length>0&&beforeTasks.every(a=>done[a.id]);
+const showBirthControl=born||days<=14||beforeComplete;
+const birthControl=$('birthControl'),destination=showBirthControl?$('nextPanel'):$('settingsBody');
+if(birthControl.parentElement!==destination){if(showBirthControl)destination.appendChild(birthControl);else destination.insertBefore(birthControl,$('disclaimer'));}
+birthControl.classList.toggle('birthcontrolSubtle',!showBirthControl);
+$('bornLabel').textContent=showBirthControl?t('Ist euer Baby schon da? Geburt bestätigen','Has your baby arrived? Confirm birth'):t('Baby ist bereits geboren – Geburtsstatus ändern','Baby has arrived – change birth status');
+const prompt=$('pastDuePrompt');
+if(pastDue && !statusConfirmed){
+ prompt.className='statusPrompt';
+ prompt.innerHTML='<h3>'+t('Ist euer Baby bereits geboren?','Has your baby been born?')+'</h3><p>'+t('Der errechnete Geburtstermin liegt in der Vergangenheit. Bitte bestätige den Geburtsstatus, damit wir passende nächste Schritte anzeigen.','The expected due date is in the past. Please confirm the birth status so we can show relevant next steps.')+'</p><div class="statusActions"><button type="button" onclick="confirmBirthStatus(true)">'+t('Ja, Baby ist geboren','Yes, baby has arrived')+'</button><button type="button" class="secondary" onclick="confirmBirthStatus(false)">'+t('Nein, wir warten noch','No, still waiting')+'</button><button type="button" class="ghost" onclick="edit()">'+t('Datum korrigieren','Correct due date')+'</button></div>';
+}else if(born){
+ prompt.className='statusPrompt';
+ const savedBirthDate=safeGet('bp-actual-birthdate')||'';
+ prompt.innerHTML='<h3>'+t('Tatsächliches Geburtsdatum','Actual date of birth')+'</h3><p>'+t('Optional eintragen. Für spätere individuelle Fristen ist das tatsächliche Geburtsdatum entscheidend.','Optional for now. The actual birth date matters for future personalized deadlines.')+'</p><div class="birthDateRow"><input type="date" aria-label="'+t('Tatsächliches Geburtsdatum','Actual date of birth')+'" id="actualBirthDate" value="'+esc(savedBirthDate)+'" onchange="saveBirthDate(this.value)"></div>';
+}else{prompt.className='hidden';prompt.innerHTML='';}
+
+const beforeOrder={midwife:5,intl:10,recognition:20,maternity:30,birthplace:35,leave1:40,leave2:41,pediatrician:50,health:60};
+const afterOrder={registry:10,health_register:20,elterngeld:30,kindergeld:40};
+const score=x=>x.phase==='birth'?(born?afterOrder[x.id]??90:999):
+ ((days<=49&&(x.id==='leave1'||x.id==='leave2'))?0:(born?100:0)+(beforeOrder[x.id]??90));
+const eligible=current.filter(a=>!done[a.id] && (born ? a.phase==='birth' : a.phase==='before')).sort((a,b)=>score(a)-score(b));
+// Previously shown batches stay in the lower plan; do not repeat them in the next three.
+let visited=[];try{visited=JSON.parse(safeGet('bp-visited')||'[]')}catch(e){}
+if(!Array.isArray(visited))visited=[];
+const visitedSet=new Set(visited);
+const profileKey='batch-v63|born:'+born;
+let batch=null;try{batch=JSON.parse(safeGet('bp-batch')||'null')}catch(e){}
+if(!batch||!Array.isArray(batch.ids)||batch.profileKey!==profileKey){batch={profileKey,ids:eligible.filter(a=>!visitedSet.has(a.id)).slice(0,3).map(a=>a.id)};safeSet('bp-batch',JSON.stringify(batch));}
+else {
+ // Preserve relevant tasks across edits. Drop only tasks no longer applicable.
+ const ids=batch.ids.filter(id=>current.some(a=>a.id===id && (born ? a.phase==='birth' : a.phase==='before')));
+ // Do not silently replace completed cards with new tasks.
+ if(ids.join('|')!==batch.ids.join('|')){batch={profileKey,ids};safeSet('bp-batch',JSON.stringify(batch));}
+}
+const batchItems=batch.ids.map(id=>current.find(a=>a.id===id)).filter(Boolean);
+const pending=batchItems.filter(a=>!done[a.id]);
+$('nextTitle').textContent=t('Deine nächsten 3 Schritte','Your next 3 steps');
+$('nextIntro').textContent=t('Ein überschaubares Paket: Erledige deine Schritte in deinem Tempo. Neue Aufgaben kommen erst auf deinen Wunsch.','One manageable set: complete these steps at your own pace. New tasks appear when you ask.');
+const completed=batchItems.length-pending.length;
+$('nextPanelCount').textContent=t(completed+' von '+batchItems.length+' erledigt',completed+' of '+batchItems.length+' completed');
+const meter='<div class="batchmeter" aria-label="'+completed+' / '+batchItems.length+'">'+batchItems.map(a=>'<span class="'+(done[a.id]?'ok':'')+'"></span>').join('')+'</div>';
+const expandedIds=new Set([...document.querySelectorAll('#nextTasks .expandTask[aria-expanded="true"]')].map(el=>el.getAttribute('aria-controls').replace(/^details-/,'')));
+const cards=batchItems.map(a=>{const isDone=!!done[a.id],n=lang==='de'?0:1;
+const details='<div class="nextdetails" id="details-'+a.id+'" '+(expandedIds.has(a.id)?'':'hidden')+'><p>'+esc(a.desc[n])+'</p><span class="pill">'+esc(a.when[n])+'</span><p class="small"><strong>'+t('Unterlagen: ','Documents: ')+'</strong>'+esc(a.docs[n])+'</p><a href="'+esc(a.link)+'">'+t('Offizielle Informationsquelle ↗','Official information source ↗')+'</a></div>';
+return '<article class="nextcard'+(isDone?' completed':'')+'"><div class="nextmeta">'+(isDone?t('✓ Erledigt','✓ Completed'):t(a.phase==='before'?'Vor der Geburt':'Nach der Geburt',a.phase==='before'?'Before birth':'After birth'))+'</div><button type="button" class="expandTask" aria-expanded="'+(expandedIds.has(a.id)?'true':'false')+'" aria-controls="details-'+a.id+'" onclick="toggleDetails(this,\'details-'+a.id+'\')"><span class="taskHeading"><strong>'+esc(a.title[n])+'</strong><span class="catlabel">'+t(a.category==='care'?'Gesundheit & Geburtsvorbereitung':'Behörden & Anträge',a.category==='care'?'Health & birth preparation':'Authorities & applications')+'</span><span class="small">'+esc(a.when[n])+'</span></span><span aria-hidden="true" class="chevron">'+(expandedIds.has(a.id)?'⌃':'⌄')+'</span></button>'+details+'<button class="secondary" type="button" onclick="checkTask(\''+a.id+'\','+(!isDone)+')">'+(isDone?t('✓ Erledigt – Rückgängig','✓ Completed – Undo'):t('Als erledigt markieren ✓','Mark complete ✓'))+'</button>'+(isDone?'':'<button class="ghost swapTaskBtn noprint" type="button" onclick="chooseTask(\''+a.id+'\')">'+t('Andere Aufgabe wählen ↔','Choose another task ↔')+'</button>')+'</article>'}).join('');
+const remaining=eligible.filter(a=>!batch.ids.includes(a.id) && !visitedSet.has(a.id));
+const showNext=completed===batchItems.length && remaining.length>0;
+const nextLabel=remaining.length===1?t('Letzte Aufgabe anzeigen →','Show final task →'):t('Nächste '+Math.min(3,remaining.length)+' Aufgaben anzeigen →','Show next '+Math.min(3,remaining.length)+' tasks →');
+$('nextTasks').innerHTML= pastDue && !statusConfirmed ? '<p class="note">'+t('Bitte zuerst den Geburtsstatus oben bestätigen.','Please confirm the birth status above first.')+'</p>' : batchItems.length ? '<p class="small">'+t(completed+' von '+batchItems.length+' erledigt',completed+' of '+batchItems.length+' completed')+'</p>'+meter+cards+(completed===batchItems.length?'<div class="batchdone">'+t('🎉 Geschafft! Dieses Aufgabenpaket ist erledigt.','🎉 Well done! You finished this set of tasks.')+'</div>':'')+(showNext?'<div class="actions noprint"><button type="button" onclick="nextBatch()">'+nextLabel+'</button></div>':completed===batchItems.length?'<p class="small">'+t('Alle verfügbaren Aufgaben wurden angezeigt.','All available tasks have been shown.')+'</p>':'') : '<p>'+t('Alle Aufgaben dieser Phase wurden bereits vorgeschlagen. Du findest sie unten im Fahrplan.','All tasks for this phase have already been suggested. You can review them below.')+'</p>';
+// If a time-sensitive task has appeared outside the frozen batch, flag it without silently replacing the batch.
+if(days>=0 && days<=49 && !born && remaining.some(a=>a.id==='leave1'||a.id==='leave2'))$('nextTasks').innerHTML+='<p class="note">'+t('Hinweis: Prüfe auch die Elternzeit-Fristen in der vollständigen Liste. Der tatsächliche Beginn ist entscheidend.','Note: Check parental leave deadlines in the full list. The actual leave start date matters.')+'</p>';
+// Top-three tasks also appear in the complete phase lists, with synchronized completion state.
+const activeIds=new Set(batchItems.map(a=>a.id));
+const phases=born?['birth','before']:['before','birth'];
+const previousOpen=new Set([...document.querySelectorAll('#tasks details.phaseSection[open]')].map(el=>el.dataset.phase));
+const initialPhase=!$('tasks').dataset.phaseInitialized;
+$('tasks').innerHTML=phases.map((phase,idx)=>{
+ const phaseTasks=current.filter(a=>a.phase===phase).sort((a,b)=>Number(!!done[a.id])-Number(!!done[b.id]));
+ const openCount=phaseTasks.filter(a=>!done[a.id]).length;
+ const heading=t(phase==='before'?'Alle Aufgaben vor der Geburt':'Alle Aufgaben nach der Geburt',phase==='before'?'All tasks before birth':'All tasks after birth');const highlighted=phaseTasks.filter(a=>activeIds.has(a.id)).length;
+ const open=initialPhase?(idx===0):previousOpen.has(phase);
+ const entries=phaseTasks.map(a=>{
+ const n=lang==='de'?0:1,isDone=!!done[a.id];
+ const checkbox='<input aria-label="'+esc(a.title[n])+'" type="checkbox" '+(isDone?'checked':'')+' onchange="checkTask(&#39;'+a.id+'&#39;,this.checked)">';
+ const detail=(activeIds.has(a.id)?'<span class="highlightBadge">'+t('↑ Auch oben hervorgehoben','↑ Also highlighted above')+'</span>':'')+'<div class="catlabel">'+t(a.category==='care'?'Gesundheit & Geburtsvorbereitung':'Behörden & Anträge',a.category==='care'?'Health & birth preparation':'Authorities & applications')+'</div><p>'+esc(a.desc[n])+'</p><span class="pill">'+esc(a.when[n])+'</span><p class="small"><strong>'+t('Unterlagen: ','Documents: ')+'</strong>'+esc(a.docs[n])+'</p><a href="'+esc(a.link)+'">'+t('Offizielle Informationsquelle ↗','Official information source ↗')+'</a>';
+ const content='<details class="doneDisclosure"><summary><span><h3>'+esc(a.title[n])+'</h3><span class="taskStatus" '+(isDone?'':'hidden')+'>'+t('✓ Erledigt','✓ Completed')+'</span></span></summary><div class="doneBody">'+detail+'</div></details>';
+ return '<article data-task-id="'+a.id+'" class="task'+(isDone?' isDone':'')+'"><div class="taskhead">'+checkbox+content+'</div></article>';
+ }).join('');
+ return '<details class="phaseSection '+(phase==='before'?'phaseBefore':'phaseAfter')+'" data-phase="'+phase+'" '+(open?'open':'')+'><summary><span>'+heading+'<br><span class="phaseCount">'+t(phaseTasks.length+' insgesamt · '+openCount+' offen · '+(phaseTasks.length-openCount)+' erledigt'+(highlighted?' · '+highlighted+' oben hervorgehoben':''),phaseTasks.length+' total · '+openCount+' open · '+(phaseTasks.length-openCount)+' completed'+(highlighted?' · '+highlighted+' highlighted above':''))+'</span></span></summary><div class="phaseBody">'+(entries||'<p class="small">'+t('Keine weiteren Aufgaben in diesem Bereich.','No other tasks in this section.')+'</p>')+'</div></details>';
+}).join('');
+$('tasks').dataset.phaseInitialized='true';
+}
+function toggleDetails(button,id){const el=$(id);const open=el.hidden;el.hidden=!open;button.setAttribute('aria-expanded',String(open));button.querySelector('.chevron').textContent=open?'⌃':'⌄'}function nextBatch(){window.bpPhaseOrder=null;
+ let batch=null;try{batch=JSON.parse(safeGet('bp-batch')||'null')}catch(e){}
+ let visited=[];try{visited=JSON.parse(safeGet('bp-visited')||'[]')}catch(e){}
+ if(!Array.isArray(visited))visited=[];
+ if(batch&&Array.isArray(batch.ids))visited=[...new Set([...visited,...batch.ids])];
+ safeSet('bp-visited',JSON.stringify(visited));safeRemove('bp-batch');render();
+ const panel=$('nextPanel');if(panel){panel.open=true;requestAnimationFrame(()=>panel.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'}));}
+}function chooseTask(oldId){
+ const done=JSON.parse(safeGet('bp-done')||'{}'),born=safeGet('bp-born')==='true';
+ let batch=null;try{batch=JSON.parse(safeGet('bp-batch')||'null')}catch(e){}
+ if(!batch||!Array.isArray(batch.ids)||!batch.ids.includes(oldId))return;
+ const candidates=current.filter(a=>!done[a.id]&&a.phase===(born?'birth':'before')&&!batch.ids.includes(a.id));
+ if(!candidates.length){alert(t('Keine weiteren offenen Aufgaben verfügbar.','No other open tasks available.'));return;}
+ const n=lang==='de'?0:1;
+ const lines=candidates.map((a,i)=>(i+1)+'. '+a.title[n]);
+ const answer=window.prompt(t('Welche Aufgabe möchtest du stattdessen oben sehen? Nummer eingeben:\\n','Which task would you like to see instead? Enter a number:\\n')+lines.join('\\n'));
+ if(answer===null)return;
+ const index=Number(answer.trim())-1;
+ if(!Number.isInteger(index)||index<0||index>=candidates.length){alert(t('Bitte eine gültige Nummer eingeben.','Please enter a valid number.'));return;}
+ batch.ids[batch.ids.indexOf(oldId)]=candidates[index].id;
+ safeSet('bp-batch',JSON.stringify(batch));
+ // A replaced task remains available for a later batch, including when previously visited.
+ let visited=[];try{visited=JSON.parse(safeGet('bp-visited')||'[]')}catch(e){}
+ safeSet('bp-visited',JSON.stringify((Array.isArray(visited)?visited:[]).filter(id=>id!==oldId)));
+ render();
+}function setBorn(checked){window.bpPhaseOrder=null;safeSet('bp-born',String(checked));safeSet('bp-birth-status-confirmed','true');if(!checked)safeRemove('bp-actual-birthdate');safeRemove('bp-batch');$('tasks').dataset.phaseInitialized='';render()}function confirmBirthStatus(checked){setBorn(checked)}function saveBirthDate(value){safeSet('bp-actual-birthdate',value)}function checkTask(id,checked){
+ const expandedBefore=new Set([...document.querySelectorAll('#tasks article[data-task-id] details[open]')].map(el=>el.closest('article').dataset.taskId));
+ const oldCards=[...document.querySelectorAll('#tasks article[data-task-id]')];
+ if(!window.bpPhaseOrder)window.bpPhaseOrder=oldCards.map(x=>x.dataset.taskId);
+ const anchor=oldCards.find(x=>x.dataset.taskId===id),oldTop=anchor?anchor.getBoundingClientRect().top:null;
+ let d=JSON.parse(safeGet('bp-done')||'{}');d[id]=checked;safeSet('bp-done',JSON.stringify(d));
+ if(!checked){let visited=[];try{visited=JSON.parse(safeGet('bp-visited')||'[]')}catch(e){}if(!Array.isArray(visited))visited=[];safeSet('bp-visited',JSON.stringify(visited.filter(x=>x!==id)));
+ let batch=null;try{batch=JSON.parse(safeGet('bp-batch')||'null')}catch(e){}
+ if(batch&&Array.isArray(batch.ids)&&!batch.ids.includes(id)){const born=safeGet('bp-born')==='true',task=current.find(a=>a.id===id);if(task&&task.phase===(born?'birth':'before')&&batch.ids.filter(x=>!d[x]).length<3){const i=batch.ids.findIndex(x=>d[x]);if(i>=0)batch.ids[i]=id;else if(batch.ids.length<3)batch.ids.push(id);safeSet('bp-batch',JSON.stringify(batch));}}}
+ render();
+ const order=new Map(window.bpPhaseOrder.map((id,i)=>[id,i]));
+ const cards=[...document.querySelectorAll('#tasks article[data-task-id]')];
+ for(const parent of new Set(cards.map(x=>x.parentElement))){const group=cards.filter(x=>x.parentElement===parent);group.sort((a,b)=>(order.get(a.dataset.taskId)??999)-(order.get(b.dataset.taskId)??999)).forEach(x=>parent.appendChild(x));}
+ for(const x of document.querySelectorAll('#tasks article[data-task-id]')){const details=x.querySelector('details.doneDisclosure');if(details)details.open=x.dataset.taskId===id?false:expandedBefore.has(x.dataset.taskId);}
+ const target=document.querySelector('#tasks article[data-task-id="'+id+'"]');
+ if(target&&oldTop!==null)window.scrollBy(0,target.getBoundingClientRect().top-oldTop);
+}
+function edit(){window.bpPhaseOrder=null;$('results').classList.add('hidden');$('setup').classList.remove('hidden')}function resetAll(){window.bpPhaseOrder=null;if(confirm(t('Alle abgehakten Aufgaben löschen?','Reset all checked tasks?'))){safeRemove('bp-done');safeRemove('bp-batch');safeRemove('bp-visited');render()}}function newPlan(){window.bpPhaseOrder=null;if(!confirm(t('Neuen Fahrplan starten? Alle Antworten, erledigten Aufgaben und Fortschritte auf diesem Gerät werden gelöscht. Das kann nicht rückgängig gemacht werden.','Start a new plan? All answers, completed tasks and progress on this device will be deleted. This cannot be undone.')))return;['bp-profile','bp-done','bp-batch','bp-visited','bp-born','bp-birth-status-confirmed','bp-actual-birthdate'].forEach(safeRemove);$('due').value='';$('state').value='BY';$('married').value='yes';$('p1').value='yes';$('p2').value='yes';$('international').value='';current=[];$('results').classList.add('hidden');$('setup').classList.remove('hidden');window.scrollTo(0,0)}function applyLang(){document.documentElement.lang=lang;$('langBtn').textContent=lang==='de'?'English':'Deutsch';document.querySelectorAll('[data-de]').forEach(el=>el.textContent=el.dataset[lang]);if(!$('results').classList.contains('hidden'))render()}function toggleLang(){window.bpPhaseOrder=null;lang=lang==='de'?'en':'de';safeSet('bp-lang',lang);applyLang()}try{const v=JSON.parse(safeGet('bp-profile')||'null');if(v){
+  for(let k in v)if($(k) && k!=='international')$(k).value=v[k];
+  // Old yes/no did not identify which parent had non-German nationality.
+  // Ask again instead of silently assigning an incorrect nationality combination.
+  if(v.international==='yes' && !v.profileVersion){
+    $('international').value='';
+    $('setup').classList.remove('hidden');
+    $('results').classList.add('hidden');
+  } else {
+    $('international').value=v.international || 'no';
+    generate();
+  }
+}}catch(e){}
+applyLang();
+window.addEventListener('pageshow',()=>{const saved=safeGet('bp-lang');if(saved==='en'||saved==='de'){lang=saved;applyLang()}});
+</script><noscript><div style='padding:20px;background:#fff0d5;color:#6b4000;font-weight:700'>JavaScript ist in dieser Vorschau deaktiviert. Bitte diese Datei in einem echten Browser öffnen oder die Web-App online bereitstellen. / JavaScript is disabled in this preview. Open in a browser or host the web app.</div></noscript></body></html>
